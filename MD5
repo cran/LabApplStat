@@ -1,0 +1,16 @@
+6ed5d6f21c2163da35e1ff3a8c4ae631 *DESCRIPTION
+43b0d83258543f4191c41c4d22dd3cf1 *NAMESPACE
+8aaf5ceafd17fc047c027de0cf3b8703 *R/DD.R
+62e111d06081db1312c8797cd46de732 *R/chisq_test_simulate.R
+398ef1e6f26af3362c3d9b5552f0f7b6 *R/emmeans_ED.R
+8f1dc8cc0d7ae419374909fc9ef42181 *R/globals.R
+3be884de813709fd6b78b1ef8c13ab60 *R/methods_designDiagram.R
+5276efbb3acf3518fbe04632378f48c0 *R/minimum.R
+19064d07c2a0470f84abd45526055a69 *R/power_chisq_test_simulate.R
+e58dea17e54a3a361318683776c19083 *README.md
+7d83fa97a93620c76c105ab4d32590cf *man/DD.Rd
+db8009a1e1ff185b4df002683fd3f38a *man/chisq.test.simulate.Rd
+904ac96774316362d4a02e3daec3e4da *man/designDiagram-class.Rd
+ff63d663722a8e0101014edc67f58ed2 *man/emmeans_ED.Rd
+b8cb97b9fb4e596a76556981356cc1a9 *man/minimum.Rd
+a72005c877f282405acbc472816d6260 *man/power.chisq.test.simulate.Rd
