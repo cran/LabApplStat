@@ -58,14 +58,24 @@
 #' @export
 DD <- function(fixed,random=NULL,data,keep=~1,center=FALSE,eps=1e-12) {
   # sanity check
-  if (class(fixed)!="formula") stop("fixed-argument must be a formula")
-  if ((!is.null(random)) && (class(random)!="formula")) stop("random-argument must be a formula")
+  if (!inherits(fixed,"formula")) stop("fixed-argument must be a formula")
+  if ((!is.null(random)) && (!inherits(random,"formula"))) stop("random-argument must be a formula")
   if (!is.data.frame(data)) stop("data-argument must be a data frame")
-  if (class(keep)!="formula") stop("keep-argument must be a formula")
+  if (!inherits(keep,"formula"))  stop("keep-argument must be a formula")
   
   # -------------------------
   # Initialize
   # -------------------------
+
+  # find model frame and number of rows
+  N.all <- nrow(data)
+  if (is.null(random)) {
+    data <- model.frame(fixed,data)
+  } else {
+    data <- model.frame(update(fixed,as.formula(paste(as.character(random),collapse=".+"))),data)
+  }
+  N <- nrow(data)
+  if (N!=N.all) warning(paste("Removed",N.all-N,"rows with missing values in response or explanatory variables"))
 
   # find terms in the design and place square brackets around random terms
   myterms <- attr(terms(fixed,data=data),"term.labels")
@@ -106,7 +116,7 @@ DD <- function(fixed,random=NULL,data,keep=~1,center=FALSE,eps=1e-12) {
     # make design matrix
     A <- model.matrix(as.formula(paste0("~0+",tmp)),data=data)
     # check if is is a categorical factor
-    myisfactor[i] <- (length(setdiff(names(stats::get_all_vars(as.formula(paste0("~0+",tmp)),data=data)),
+    myisfactor[i] <- (length(setdiff(attr(terms(as.formula(paste0("~0+",tmp))),"term.labels"),
                                      names(attr(A,"contrasts"))))==0)
     # remove zero columns
     A <- A[,!apply(A,2,function(x){all(x==0)}),drop=FALSE]
@@ -123,6 +133,7 @@ DD <- function(fixed,random=NULL,data,keep=~1,center=FALSE,eps=1e-12) {
       mydesigns[[i]] <- tmp$u[,tmp$d>eps,drop=FALSE]%*%diag(tmp$d[tmp$d>eps],nrow=sum(tmp$d>eps))%*%t(tmp$v[,tmp$d>eps,drop=FALSE])
       mybasis[[i]]   <- tmp$u[,tmp$d>eps,drop=FALSE]
     } else {
+      N <- nrow(data)  # Hack: Check this!
       mydesigns[[i]] <- matrix(0,N,0)
       mybasis[[i]] <- matrix(0,N,0)
     }
@@ -130,17 +141,6 @@ DD <- function(fixed,random=NULL,data,keep=~1,center=FALSE,eps=1e-12) {
     Nparm[i] <- ncol(mybasis[[i]])
   }
 
-  
-  # find model frame and number of rows
-  N.all <- nrow(data)
-  if (is.null(random)) {
-    data <- model.frame(fixed,data)
-  } else {
-    data <- model.frame(update(fixed,as.formula(paste(as.character(random),collapse=".+"))),data)
-  }
-  N <- nrow(data)
-  if (N!=N.all) warning(paste("Removed",N.all-N,"rows with missing values in response or explanatory variables"))
-  
   
   # extract response variable if it is present
   y <- model.response(data)
@@ -379,7 +379,7 @@ DD <- function(fixed,random=NULL,data,keep=~1,center=FALSE,eps=1e-12) {
   myterms.remove <- setdiff(myterms.remove,"[I]")
   
   # Find projections onto basis functions and make Type-I F-tests
-  # New: Introduce tau2 to contain cumulated variance estimates
+  # New: Introduce tau2 to contain cummulated variance estimates
   pvalue <- matrix(NA,M,M)
   ii     <- 1+length(myterms.remove)
   SS     <- matrix(NA,ii,M)
